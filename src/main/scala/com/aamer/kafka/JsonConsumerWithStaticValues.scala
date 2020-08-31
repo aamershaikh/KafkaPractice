@@ -15,11 +15,12 @@ object JsonConsumerWithStaticValues extends App {
 
   import spark.implicits._
 
-  // static load of simple data from local storage
+  // load of simple data from local storage
   val simpleData = Seq(
     (1,"GHI","LMP"),
     (2,"ABC","NYC")
   )
+
   val df = simpleData.toDF("id","firstname","lastname")
   df.printSchema()
   df.createTempView("initialLoad")
@@ -50,16 +51,14 @@ object JsonConsumerWithStaticValues extends App {
   personStringDeltaDataframe.printSchema()
   personStringDeltaDataframe.createTempView("deltaLoad")
 
-  val finalMasterDf = df.union(personStringDeltaDataframe)
+  val finalMasterDf = personStringDeltaDataframe.union(df).dropDuplicates("id")
   finalMasterDf.printSchema()
   finalMasterDf.createTempView("masterData")
-  finalMasterDf.show()
+
 
   // use option path and checkpoint location only if we have to write it to a file system
   val query = finalMasterDf.writeStream
     .format("console")
-    //.option("path", "/Users/aamershaikh/Documents/ToDelete_SparkLogs")
-    //.option("checkpointLocation", "/Users/aamershaikh/Documents/ToDelete_SparkLogs")
     .outputMode("append")
     .start()
     .awaitTermination()
