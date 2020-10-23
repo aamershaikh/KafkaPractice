@@ -18,10 +18,11 @@ object JsonConsumerWithBothStaticValues extends App {
   // load of simple data from local storage
   val initialData = Seq(
     (1,"Aamer","Shaikh"),
-    (2,"ABC","DEF")
+    (4,"ABC","DEF"),
+    (5, "VUP","MAN")
   )
 
-  val initialdf = initialData.toDF("id","firstname","lastname")
+  var initialdf = initialData.toDF("id", "firstname", "lastname")
   initialdf.printSchema()
   initialdf.createOrReplaceGlobalTempView("a")
   initialdf.show()
@@ -39,11 +40,11 @@ object JsonConsumerWithBothStaticValues extends App {
 
 
 
-  val finalMasterDf = deltadf2.union(initialdf).dropDuplicates("id")
-  finalMasterDf.printSchema()
-  finalMasterDf.createTempView("masterData")
+  initialdf = deltadf2.union(initialdf).dropDuplicates("id")
+  initialdf.printSchema()
+  initialdf.createTempView("masterData")
 
-  finalMasterDf.show()
+  initialdf.show()
 
   // use option path and checkpoint location only if we have to write it to a file system
   /*val query = finalMasterDf.writeStream
